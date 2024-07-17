@@ -1,9 +1,9 @@
 export const panels = [
-    "Panel for Position 1",
-    "Panel for Position 2",
-    "Panel for Position 3",
-    "Panel for Position 4",
-    "Panel for Position 5",
-    "Panel for Position 0"
+    "Panel for Piper",
+    "Panel for Maquette",
+    "Panel for PicoBean",
+    "Panel for Magic Mirror",
+    "Panel for Art",
+    "Panel for Cg"
   ];
   
