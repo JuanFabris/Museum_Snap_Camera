@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import gsap from 'gsap';
-import { useThree } from '@react-three/fiber';
-import { Html } from '@react-three/drei';
-import { panels } from '../utils';
+import { Canvas, useThree } from '@react-three/fiber';
+import { positions } from '../utils';
 
 const Modelview = () => {
   const { scene, gl } = useThree();
@@ -21,82 +22,94 @@ const Modelview = () => {
 
     renderer.setClearColor(0xA3A3A3);
 
-    camera.position.set(-1.7, 0, 8.7);
-    camera.lookAt(1.7, 0, 8.7);
+    camera.position.set(0.3, 0.5, 14.5);
+
+    // Create CSS2DRenderer
+    const labelRenderer = new CSS2DRenderer(Canvas);
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position = 'absolute';
+    labelRenderer.domElement.style.top = '0px';
+    document.body.appendChild(labelRenderer.domElement);
+
+    const controls = new OrbitControls(camera, labelRenderer.domElement);
+    controls.enablePan = false;
+    controls.enableZoom = false;
+
+    const updateCameraOrbit = () => {
+      const forward = new THREE.Vector3();
+      camera.getWorldDirection(forward);
+      controls.target.copy(camera.position).add(forward);
+    };
+
+    controls.addEventListener('change', updateCameraOrbit);
+
+
 
     const gltfLoader = new GLTFLoader();
-
-    let position = 0;
 
     gltfLoader.load('./models/Kings.glb', function (gltf) {
       const model = gltf.scene;
       scene.add(model);
 
-      const cameraPositions = [
-        { position: new THREE.Vector3(-1, 1.6, 5), rotation: new THREE.Euler(0, 0.1, 0) },
-        { position: new THREE.Vector3(2.8, 0, 3.6), rotation: new THREE.Euler(0, -2, 0) },
-        { position: new THREE.Vector3(2.5, -0.9, 12.2), rotation: new THREE.Euler(0.9, 0.6, -0.6) },
-        { position: new THREE.Vector3(-2.7, 0.6, 3.7), rotation: new THREE.Euler(0.6, 1.9, -0.6) },
-        { position: new THREE.Vector3(-1.7, 0, 8.7), rotation: new THREE.Euler(0, 4.7, 0) },
-        { position: new THREE.Vector3(0.5, 0.8, 10), rotation: new THREE.Euler(0.3, 1.65, -0.3) },
-      ];
+      // Ensure camera looks inside the room initially
+      camera.lookAt(model.position);
 
-      cameraPositions.forEach(({ position, rotation }, index) => {
-        const buttonStyle = {
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          gap: 5
-        };
+      positions.forEach((pos, index) => {
+        // Create button element
+        const button = document.createElement('button');
+        button.textContent = ``;
+        button.style.padding = '15px';
+        button.style.borderRadius = '100%';
+        button.style.background = 'white';
+        button.style.color = 'white';
+        button.style.cursor = 'pointer';
+        button.addEventListener('click', () => moveCameraToPosition(index));
 
-        const handleClick = () => {
-          moveCamera(position.x, position.y, position.z);
-          rotateCamera(rotation.x, rotation.y, rotation.z);
-        };
-
-        const buttonPosition = new THREE.Vector3(position.x, position.y, position.z);
-        const screenPosition = buttonPosition.project(camera);
-        const x = (screenPosition.x + 1) / 2 * window.innerWidth;
-        const y = -(screenPosition.y - 1) / 2 * window.innerHeight;
-
-        const buttonElement = document.createElement('button');
-        buttonElement.textContent = panels[index] // Text content for the button
-        buttonElement.style.cssText = `
-          ${buttonStyle}
-          left: ${x}px;
-          top: ${y}px;
-          padding : 10px;
-          border : 1px dotted red
-        `;
-        buttonElement.addEventListener('click', handleClick);
-        document.body.appendChild(buttonElement);
+        // Create CSS2DObject and add it to the scene
+        const label = new CSS2DObject(button);
+        label.position.set(pos.x, pos.y, pos.z);
+        scene.add(label);
       });
 
-      function moveCamera(x, y, z) {
+      function moveCameraToPosition(index) {
+        const { x, y, z, lookAt } = positions[index];
+
+        // Disable controls temporarily during camera movement
+        controls.enabled = false;
+
+        // Animate camera to the position
         gsap.to(camera.position, {
           x,
           y,
           z,
-          duration: 3,
+          duration: 1,
           ease: 'power3.inOut',
           onUpdate: () => {
+            camera.lookAt(lookAt);
             camera.updateProjectionMatrix();
           },
+          onComplete: () => {
+            // Re-enable controls and update orbit
+            controls.enabled = true;
+            updateCameraOrbit();
+          }
         });
-      }
 
-      function rotateCamera(x, y, z) {
-        gsap.to(camera.rotation, {
-          x,
-          y,
-          z,
-          duration: 3,
+        // Animate controls target to lookAt position
+        gsap.to(controls.target, {
+          x: lookAt.x,
+          y: lookAt.y,
+          z: lookAt.z,
+          duration: 1,
+          ease: 'power3.inOut'
         });
       }
     });
 
     const animate = () => {
+      controls.update(); // Update controls in animation loop
       renderer.render(scene, camera);
+      labelRenderer.render(scene, camera); // Render labels in animation loop
     };
 
     renderer.setAnimationLoop(animate);
@@ -105,16 +118,18 @@ const Modelview = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
+      labelRenderer.setSize(window.innerWidth, window.innerHeight);
     };
 
     window.addEventListener('resize', handleResize);
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      document.body.removeChild(labelRenderer.domElement);
     };
-  }, []);
+  }, [gl, scene]);
 
-  return null;
+  return null; // Return null or React fragment
 };
 
 export default Modelview;

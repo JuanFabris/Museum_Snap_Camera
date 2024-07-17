@@ -6,9 +6,6 @@ import { OrbitControls } from '@react-three/drei';
 
 const App = () => (
   <Canvas>
-    <ambientLight intensity={1} />
-    <OrbitControls enableZoom={false}
-    enablePan = {true} />
     <Modelview />
   </Canvas>
 );
