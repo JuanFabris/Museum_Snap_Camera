@@ -4,8 +4,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import gsap from 'gsap';
-import { Canvas, useThree } from '@react-three/fiber';
-import { positions } from '../utils';
+import { useThree } from '@react-three/fiber';
+import { positions, images, panels } from '../constants';
 
 const Modelview = () => {
   const { scene, gl } = useThree();
@@ -24,8 +24,7 @@ const Modelview = () => {
 
     camera.position.set(0.3, 0.5, 14.5);
 
-    // Create CSS2DRenderer
-    const labelRenderer = new CSS2DRenderer(Canvas);
+    const labelRenderer = new CSS2DRenderer();
     labelRenderer.setSize(window.innerWidth, window.innerHeight);
     labelRenderer.domElement.style.position = 'absolute';
     labelRenderer.domElement.style.top = '0px';
@@ -34,7 +33,7 @@ const Modelview = () => {
     const controls = new OrbitControls(camera, labelRenderer.domElement);
     controls.enablePan = false;
     controls.enableZoom = false;
-
+    
     const updateCameraOrbit = () => {
       const forward = new THREE.Vector3();
       camera.getWorldDirection(forward);
@@ -42,8 +41,6 @@ const Modelview = () => {
     };
 
     controls.addEventListener('change', updateCameraOrbit);
-
-
 
     const gltfLoader = new GLTFLoader();
 
@@ -55,27 +52,48 @@ const Modelview = () => {
       camera.lookAt(model.position);
 
       positions.forEach((pos, index) => {
-        // Create button element
         const button = document.createElement('button');
-        button.textContent = ``;
-        button.style.padding = '15px';
-        button.style.borderRadius = '100%';
-        button.style.background = 'white';
-        button.style.color = 'white';
-        button.style.cursor = 'pointer';
+        const btnImg = document.createElement('img');
+        btnImg.classList.add('button-img');
+        button.appendChild(btnImg);
+        button.classList.add('button-positions');
+        
+        const image = images.find(img => img.pos === index + 1);
+        if (image) {
+          btnImg.src = `${image.image}`;
+        }
+
         button.addEventListener('click', () => moveCameraToPosition(index));
 
-        // Create CSS2DObject and add it to the scene
         const label = new CSS2DObject(button);
         label.position.set(pos.x, pos.y, pos.z);
         scene.add(label);
       });
 
+      function createPanels() {
+        return panels.map(panel => {
+          const div = document.createElement('div');
+          div.classList.add('panel');
+          panel.textLists.forEach(text => {
+            const p = document.createElement('p');
+            p.innerText = text;
+            div.appendChild(p);
+          });
+          const panelObject = new CSS2DObject(div);
+          div.style.display = 'none'; // Hide panel initially
+          return panelObject;
+        });
+      }
+
+      const panelObjects = createPanels();
+      panelObjects.forEach(panel => {
+        scene.add(panel);
+      });
+
       function moveCameraToPosition(index) {
         const { x, y, z, lookAt } = positions[index];
 
-        // Disable controls temporarily during camera movement
-        controls.enabled = false;
+        controls.enabled = false; // Disable Orbit Controls
 
         // Animate camera to the position
         gsap.to(camera.position, {
@@ -89,13 +107,12 @@ const Modelview = () => {
             camera.updateProjectionMatrix();
           },
           onComplete: () => {
-            // Re-enable controls and update orbit
             controls.enabled = true;
+            manageButtonsAndPanels(index, lookAt);
             updateCameraOrbit();
           }
         });
 
-        // Animate controls target to lookAt position
         gsap.to(controls.target, {
           x: lookAt.x,
           y: lookAt.y,
@@ -104,12 +121,28 @@ const Modelview = () => {
           ease: 'power3.inOut'
         });
       }
+
+      function manageButtonsAndPanels(index, lookAt) {
+        const buttons = document.querySelectorAll('.button-positions');
+        buttons.forEach((button, i) => {
+          button.style.opacity = i === index ? '0' : '1';
+        });
+
+        panelObjects.forEach((panel, i) => {
+          if (i === index) {
+            panel.position.set(lookAt.x, lookAt.y, lookAt.z);
+            panel.element.style.display = 'block';
+          } else {
+            panel.element.style.display = 'none';
+          }
+        });
+      }
     });
 
     const animate = () => {
-      controls.update(); // Update controls in animation loop
+      controls.update(); // Update controls
       renderer.render(scene, camera);
-      labelRenderer.render(scene, camera); // Render labels in animation loop
+      labelRenderer.render(scene, camera); // Render labels
     };
 
     renderer.setAnimationLoop(animate);
@@ -129,7 +162,7 @@ const Modelview = () => {
     };
   }, [gl, scene]);
 
-  return null; // Return null or React fragment
+  return null;
 };
 
 export default Modelview;

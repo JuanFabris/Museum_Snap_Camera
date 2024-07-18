@@ -1,19 +1,22 @@
-import * as THREE from 'three'
+import blue from '/images/blue.jpg'
+import yellow from '/images/yellow.jpg'
+import valley from '/images/valley.jpg'
+import pepe from '/images/pepe.jpg'
+import pfp from '/images/pfp.jpg'
+import shk from '/images/shk.jpg'
+import spg from '/images/spg.jpg'
+import spdmn from '/images/spdmn.jpg'
+import doggo from '/images/doggo.jpg'
+import magic from '/images/magic.jpg'
 
-export const panels = [
-    "Panel for Piper",
-    "Panel for Maquette",
-    "Panel for PicoBean",
-    "Panel for Magic Mirror",
-    "Panel for Art",
-    "Panel for Cg"
-  ];
-  
-export const positions = [
-  { x: -3.5, y: 1.6, z: 10, lookAt: new THREE.Vector3(-10, 0, 0) },
-  { x: 2.8, y: 0, z: 3.6, lookAt: new THREE.Vector3(1, 1, 1) },
-  { x: 0, y: 0, z: 9, lookAt: new THREE.Vector3(2, 0, 0) },
-  { x: -2.7, y: 0.6, z: 3.7, lookAt: new THREE.Vector3(3, 3, 3) },
-  { x: -1.7, y: 0, z: 8.7, lookAt: new THREE.Vector3(4, 0, 4) },
-  { x: 0.5, y: 0.8, z: 10, lookAt: new THREE.Vector3(5, 5, 5) },
-];
+
+export const blueImg = blue;
+export const yellowImg = yellow;
+export const valleyImg = valley;
+export const pfpImg = pfp;
+export const shkImg = shk;
+export const spgImg = spg;
+export const spdmnImg = spdmn;
+export const pepeImg = pepe;
+export const doggoImg = doggo;
+export const magicImg = magic;

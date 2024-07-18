@@ -7,7 +7,98 @@
 #root {
     width: 100vw;
     height: 100vh;
-    background-color: #d9afd9;
-    background-image: linear-gradient(0deg, #d9afd9 0%, #97d9e1 100%);
 }
 
+
+.button-positions {
+    border: 2px solid #000; /* Bordo nero spesso 2px */
+    outline: none;
+    color: rgb(255, 255, 255);
+    cursor: pointer;
+    position: relative;
+    z-index: 0;
+    border-radius: 50%;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    width: 50px;
+    height: 50px;
+    opacity: 1;
+  }
+  
+  .button-positions:before {
+    content: "";
+    background: linear-gradient(
+      45deg,
+      #000000,
+      #111111,
+      #222222,
+      #333333,
+      #444444,
+      #555555,
+      #666666,
+      #777777,
+      #888888,
+      #999999,
+      #AAAAAA,
+      #BBBBBB,
+      #CCCCCC,
+      #DDDDDD,
+      #EEEEEE,
+      #FFFFFF,
+      #000000
+    );
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    background-size: 100%;
+    z-index: -1;
+    filter: blur(2.5px);
+    -webkit-filter: blur(2.5px);
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    animation: glowing-button-85 20s linear infinite;
+    transition: opacity 0.3s ease-in-out;
+    border-radius: 50%;
+  }
+  
+  @keyframes glowing-button-85 {
+    0% {
+      background-position: 0 0;
+    }
+    50% {
+      background-position: 400% 0;
+    }
+    100% {
+      background-position: 0 0;
+    }
+  }
+  
+  .button-positions:after {
+    z-index: -1;
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8); 
+    left: 0;
+    top: 0;
+    border-radius: 50%;
+  }
+  
+  .button-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 100%;
+    object-fit: cover;
+    opacity: 1;
+  }
+
+  .panel {
+    width: 150px;
+    height: auto;
+    border: 2px solid black;
+    background-color: white;
+    padding: 10px;
+    box-sizing: border-box;
+  }
