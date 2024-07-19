@@ -17,13 +17,15 @@ from '../utils';
 
   
 export const positions = [
-  { x: -3, y: 0, z: 11, lookAt: new THREE.Vector3(-10, 0, 0) },
+  { x: -3, y: 0, z: 9.5, lookAt: new THREE.Vector3(-10, 0, 8) },
   { x: 2.8, y: 0, z: 3.6, lookAt: new THREE.Vector3(1, 1, 1) },
   { x: 0, y: 0, z: 9, lookAt: new THREE.Vector3(2, 0, 0) },
   { x: -2.7, y: 0.6, z: 3.7, lookAt: new THREE.Vector3(3, 3, 3) },
   { x: -1.7, y: 0, z: 8.7, lookAt: new THREE.Vector3(4, 0, 4) },
   { x: 0.5, y: 0.8, z: 10, lookAt: new THREE.Vector3(5, 5, 5) },
 ];
+
+
 
 export const images = [
   {
@@ -56,34 +58,26 @@ export const images = [
 export const panels = [
   {
     pos: 1,
-    textLists: [
-      "Enter A17 Pro.",
-      "Game‑changing chip.",
-      "Groundbreaking performance.",
-    ],
+    textLists: ["Piper"]
   },
   {
     pos: 2,
-    textLists: ["Titanium.", "So strong. So light. So Pro."],
+    textLists: ["Magic Mirror"],
   },
   {
     pos: 3,
-    textLists: [
-      "iPhone 15 Pro Max has the",
-      "longest optical zoom in",
-      "iPhone ever. Far out.",
-    ],
+    textLists: ["Picobean"],
   },
   {
     pos: 4,
-    textLists: ["All-new Action button.", "What will yours do?."],
+    textLists: ["Hexapod"],
   },
   {
     pos: 5,
-    textLists: ["All-new Action button.", "What will yours do?."],
+    textLists: ["Metapedro"],
   },
   {
     pos: 6,
-    textLists: ["All-new Action button.", "What will yours do?."],
+    textLists: ["MetaVez"],
   },
 ];

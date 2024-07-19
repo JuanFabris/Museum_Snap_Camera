@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -9,6 +9,8 @@ import { positions, images, panels } from '../constants';
 
 const Modelview = () => {
   const { scene, gl } = useThree();
+  const [activeButton, setActiveButton] = useState(null);
+  const buttonsRef = useRef([]);
 
   useEffect(() => {
     const renderer = gl;
@@ -20,7 +22,7 @@ const Modelview = () => {
     );
 
     renderer.setClearColor(0xA3A3A3);
-    camera.position.set(0.3, 0.5, 14.5);
+    camera.position.set(0, 0, 9);
 
     const labelRenderer = new CSS2DRenderer();
     labelRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -53,6 +55,8 @@ const Modelview = () => {
         btnImg.classList.add('button-img');
         button.appendChild(btnImg);
         button.classList.add('button-positions');
+        button.id = `button-${index}`; // Assign unique ID
+        buttonsRef.current[index] = button; // Save button reference
 
         const image = images.find(img => img.pos === index + 1);
         if (image) {
@@ -84,7 +88,7 @@ const Modelview = () => {
 
       const panelObjects = createPanels();
       panelObjects.forEach(panel => {
-      panel.element.style.visibility = 'hidden';
+        panel.element.style.visibility = 'hidden';
       });
 
       function moveCameraToPosition(index) {
@@ -104,7 +108,6 @@ const Modelview = () => {
           },
           onComplete: () => {
             controls.enabled = true;
-            manageButtonsAndPanels(index, lookAt);
             updateCameraOrbit();
           }
         });
@@ -114,14 +117,23 @@ const Modelview = () => {
           y: lookAt.y,
           z: lookAt.z,
           duration: 1,
-          ease: 'power3.inOut'
+          ease: 'power3.inOut',
+          onComplete: () => {
+            manageButtonsAndPanels(index, lookAt);
+          }
         });
       }
 
       function manageButtonsAndPanels(index, lookAt) {
-        const buttons = document.querySelectorAll('.button-positions');
+        setActiveButton(index);
+
+        const buttons = buttonsRef.current;
         buttons.forEach((button, i) => {
-          button.style.opacity = i === index ? '0' : '1';
+          if (i === index) {
+            button.style.opacity = '0';
+          } else {
+            button.style.opacity = '1';
+          }
         });
 
         panelObjects.forEach((panel, i) => {
@@ -139,7 +151,7 @@ const Modelview = () => {
       controls.update();
       renderer.render(scene, camera);
       labelRenderer.render(scene, camera);
-      requestAnimationFrame(animate); // Ensure continuous rendering
+      requestAnimationFrame(animate);
     };
 
     requestAnimationFrame(animate);
