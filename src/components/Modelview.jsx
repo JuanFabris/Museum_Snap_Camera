@@ -12,7 +12,6 @@ const Modelview = () => {
 
   useEffect(() => {
     const renderer = gl;
-
     const camera = new THREE.PerspectiveCamera(
       45,
       window.innerWidth / window.innerHeight,
@@ -21,7 +20,6 @@ const Modelview = () => {
     );
 
     renderer.setClearColor(0xA3A3A3);
-
     camera.position.set(0.3, 0.5, 14.5);
 
     const labelRenderer = new CSS2DRenderer();
@@ -33,7 +31,7 @@ const Modelview = () => {
     const controls = new OrbitControls(camera, labelRenderer.domElement);
     controls.enablePan = false;
     controls.enableZoom = false;
-    
+
     const updateCameraOrbit = () => {
       const forward = new THREE.Vector3();
       camera.getWorldDirection(forward);
@@ -43,12 +41,10 @@ const Modelview = () => {
     controls.addEventListener('change', updateCameraOrbit);
 
     const gltfLoader = new GLTFLoader();
-
     gltfLoader.load('./models/Kings.glb', function (gltf) {
       const model = gltf.scene;
       scene.add(model);
 
-      // Ensure camera looks inside the room initially
       camera.lookAt(model.position);
 
       positions.forEach((pos, index) => {
@@ -57,7 +53,7 @@ const Modelview = () => {
         btnImg.classList.add('button-img');
         button.appendChild(btnImg);
         button.classList.add('button-positions');
-        
+
         const image = images.find(img => img.pos === index + 1);
         if (image) {
           btnImg.src = `${image.image}`;
@@ -80,22 +76,22 @@ const Modelview = () => {
             div.appendChild(p);
           });
           const panelObject = new CSS2DObject(div);
-          div.style.display = 'none'; // Hide panel initially
+          div.style.visibility = 'hidden';
+          scene.add(panelObject);
           return panelObject;
         });
       }
 
       const panelObjects = createPanels();
       panelObjects.forEach(panel => {
-        scene.add(panel);
+      panel.element.style.visibility = 'hidden';
       });
 
       function moveCameraToPosition(index) {
         const { x, y, z, lookAt } = positions[index];
 
-        controls.enabled = false; // Disable Orbit Controls
+        controls.enabled = false;
 
-        // Animate camera to the position
         gsap.to(camera.position, {
           x,
           y,
@@ -131,21 +127,22 @@ const Modelview = () => {
         panelObjects.forEach((panel, i) => {
           if (i === index) {
             panel.position.set(lookAt.x, lookAt.y, lookAt.z);
-            panel.element.style.display = 'block';
+            panel.element.style.visibility = 'visible';
           } else {
-            panel.element.style.display = 'none';
+            panel.element.style.visibility = 'hidden';
           }
         });
       }
     });
 
     const animate = () => {
-      controls.update(); // Update controls
+      controls.update();
       renderer.render(scene, camera);
-      labelRenderer.render(scene, camera); // Render labels
+      labelRenderer.render(scene, camera);
+      requestAnimationFrame(animate); // Ensure continuous rendering
     };
 
-    renderer.setAnimationLoop(animate);
+    requestAnimationFrame(animate);
 
     const handleResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
