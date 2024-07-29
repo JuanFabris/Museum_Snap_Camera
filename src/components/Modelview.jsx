@@ -42,10 +42,25 @@ const Modelview = () => {
 
     controls.addEventListener('change', updateCameraOrbit);
 
+    // Add Lights
+    const ambientLight = new THREE.AmbientLight(0x404040); // Soft white light
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1); // White light
+    directionalLight.position.set(10, 10, 10).normalize();
+    scene.add(directionalLight);
+
     const gltfLoader = new GLTFLoader();
     gltfLoader.load('./models/Kings.glb', function (gltf) {
       const model = gltf.scene;
       scene.add(model);
+
+      gltfLoader.load('./models/song_noir_chinese_shaped_vase.glb', function (vaseGltf) {
+        const vaseModel = vaseGltf.scene;
+        vaseModel.position.set(0, -1.3, 5);
+        vaseModel.scale.set(1.5, 1.5, 1.5);
+        model.add(vaseModel);
+      });
 
       camera.lookAt(model.position);
 
@@ -55,8 +70,8 @@ const Modelview = () => {
         btnImg.classList.add('button-img');
         button.appendChild(btnImg);
         button.classList.add('button-positions');
-        button.id = `button-${index}`; // Assign unique ID
-        buttonsRef.current[index] = button; // Save button reference
+        button.id = `button-${index}`;
+        buttonsRef.current[index] = button;
 
         const image = images.find(img => img.pos === index + 1);
         if (image) {
@@ -87,13 +102,9 @@ const Modelview = () => {
       }
 
       const panelObjects = createPanels();
-      panelObjects.forEach(panel => {
-        panel.element.style.visibility = 'hidden';
-      });
 
       function moveCameraToPosition(index) {
         const { x, y, z, lookAt } = positions[index];
-
         controls.enabled = false;
 
         gsap.to(camera.position, {
@@ -129,11 +140,7 @@ const Modelview = () => {
 
         const buttons = buttonsRef.current;
         buttons.forEach((button, i) => {
-          if (i === index) {
-            button.style.opacity = '0';
-          } else {
-            button.style.opacity = '1';
-          }
+          button.style.opacity = i === index ? '0' : '1';
         });
 
         panelObjects.forEach((panel, i) => {
